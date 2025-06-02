@@ -1,0 +1,4 @@
+Flask
+gunicorn
+pytz
+pg8000

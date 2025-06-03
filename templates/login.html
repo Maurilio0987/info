@@ -1,18 +1,100 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title></title>
+    <title>Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 350px;
+            text-align: center;
+        }
+        .login-title {
+            color: #6a0dad;
+            margin-bottom: 25px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 12px;
+            color: #6a0dad;
+        }
+        input {
+            width: 100%;
+            padding: 12px 15px 12px 40px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #6a0dad;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #5a0b9d;
+        }
+        .error {
+            color: #ff0000;
+            margin: 10px 0;
+        }
+        .register-link {
+            margin-top: 20px;
+            color: #333;
+        }
+        .register-link a {
+            color: #6a0dad;
+            text-decoration: none;
+        }
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <form action="/login" method="POST">
-        <input type="text" name="usuario"> <br>
-        <input type="password" name="senha"> <br>
-        {% if erro %}
-            <br> <span>{{ erro }}</span>
-        {% endif %}
-        <button type="submit">Entrar</button>
-    </form>
-    <br> <a href="/cadastro">Criar conta</a>
-    
+    <div class="login-container">
+        <h1 class="login-title"><i class="fas fa-lock"></i> Login</h1>
+        <form action="/login" method="POST">
+            <div class="input-group">
+                <i class="fas fa-user"></i>
+                <input type="text" name="usuario" placeholder="Usuário" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-key"></i>
+                <input type="password" name="senha" placeholder="Senha" required>
+            </div>
+            {% if erro %}
+                <div class="error">
+                    <i class="fas fa-exclamation-circle"></i> {{ erro }}
+                </div>
+            {% endif %}
+            <button type="submit"><i class="fas fa-sign-in-alt"></i> Entrar</button>
+        </form>
+        <div class="register-link">
+            Não tem uma conta? <a href="/cadastro"><i class="fas fa-user-plus"></i> Criar conta</a>
+        </div>
+    </div>
 </body>
 </html>

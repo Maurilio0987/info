@@ -1,12 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Estoque</title>
+    <title>Sistema de Gestão - Estoque</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+        }
+        h1 {
+            color: #6a0dad;
+            text-align: center;
+            margin-bottom: 30px;
+        }
         table {
             margin: auto;
             border-collapse: collapse;
-            width: 80%;
+            width: 100%;
             background-color: white;
         }
         th, td {
@@ -17,21 +38,107 @@
         .editable {
             background-color: #f0f0f0;
         }
+        .menu-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 20px;
+            margin: 10px 0;
+            background: #6a0dad;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        .menu-link:hover {
+            background: #5a0b9d;
+            transform: translateY(-2px);
+        }
+        .menu-link i {
+            width: 20px;
+            text-align: center;
+        }
+        .logout {
+            background: #333;
+        }
+        .logout:hover {
+            background: #222;
+        }
+        button {
+            background: #6a0dad;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #5a0b9d;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            transition: border 0.3s;
+        }
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            border-color: #6a0dad;
+            outline: none;
+        }
+        input[type="submit"] {
+            background: #6a0dad;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        input[type="submit"]:hover {
+            background: #5a0b9d;
+        }
     </style>
 </head>
 <body>
-    <a href="/principal">Voltar</a> <br>
-    <h1>Estoque</h1>
+    <div class="container">
+        <h1><i class="fas fa-boxes"></i> Controle de Estoque</h1>
 
-    <h2 style="text-align: center;">Adicionar Produto</h2> <br>
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <a class="menu-link" href="/principal"><i class="fas fa-arrow-left"></i> Voltar</a>
+        </div>
 
-    <form id="form-produto">
-        <label>Nome do Produto:</label>
-        <input type="text" name="nome" id="nome" required> <br>
-        <label>Quantidade:</label>
-        <input type="number" name="quantidade" id="quantidade" min="1" required> <br>
-        <label>Preço:</label>
-        <input type="number" name="preco" id="preco" step="0.01" min="0" required> <br>
+    <h2 style="color: #6a0dad;"><i class="fas fa-plus-circle"></i> Adicionar Produto</h2>
+
+    <form id="form-produto" style="margin-bottom: 30px; background: #f9f9f9; padding: 25px; border-radius: 8px;">
+        <div class="form-group">
+            <label for="nome">Nome do Produto</label>
+            <input type="text" name="nome" id="nome" placeholder="Digite o nome do produto" required>
+        </div>
+        <div class="form-group">
+            <label for="quantidade">Quantidade</label>
+            <input type="number" name="quantidade" id="quantidade" min="1" placeholder="Quantidade em estoque" required>
+        </div>
+        <div class="form-group">
+            <label for="preco">Preço Unitário (R$)</label>
+            <input type="number" name="preco" id="preco" step="0.01" min="0" placeholder="0.00" required>
+        </div>
         <input type="submit" value="Adicionar Produto" id="botao-submit">
 
     </form>
@@ -41,15 +148,23 @@
     <br>
     <h2 style="text-align: center;">Atualizar Produto</h2> <br>
 
-    <form id="form-atualizar">
-        <label>Id:</label>
-        <input type="number" name="id" id="id" min="1" required> <br>
-        <label>Novo nome do produto(ou o mesmo):</label>
-        <input type="text" name="nome" id="nome-atualizar" required> <br>
-        <label>Nova Quantidade(ou a mesma):</label>
-        <input type="number" name="quantidade" id="quantidade-atualizar" min="1" required> <br>
-        <label>Novo Preço(ou o mesmo):</label>
-        <input type="number" name="preco" id="preco-atualizar" step="0.01" min="0" required> <br>
+    <form id="form-atualizar" style="margin-bottom: 30px; background: #f9f9f9; padding: 25px; border-radius: 8px;">
+        <div class="form-group">
+            <label for="id">ID do Produto</label>
+            <input type="number" name="id" id="id" min="1" placeholder="Digite o ID do produto" required>
+        </div>
+        <div class="form-group">
+            <label for="nome-atualizar">Nome do Produto</label>
+            <input type="text" name="nome" id="nome-atualizar" placeholder="Novo nome ou mantenha o atual" required>
+        </div>
+        <div class="form-group">
+            <label for="quantidade-atualizar">Quantidade</label>
+            <input type="number" name="quantidade" id="quantidade-atualizar" min="1" placeholder="Nova quantidade ou mantenha a atual" required>
+        </div>
+        <div class="form-group">
+            <label for="preco-atualizar">Preço Unitário (R$)</label>
+            <input type="number" name="preco" id="preco-atualizar" step="0.01" min="0" placeholder="Novo preço ou mantenha o atual" required>
+        </div>
         <input type="submit" value="Atualizar Produto" id="botao-submit-atualizar">
     </form>
 

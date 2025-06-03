@@ -190,9 +190,9 @@ def historico():
     historico = db.tabela("historico")
     return render_template("historico.html", historico=historico)
 
-app.run(debug=True, host="10.177.1.28", port=80)
+#app.run(debug=True, host="10.177.1.28", port=80)
 
 
-#if __name__ == "__main__":
-#    port = int(os.environ.get("PORT", 5000))
-#    app.run(host="0.0.0.0", port=port)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)

@@ -31,9 +31,9 @@ class DatabaseManager:
             preco NUMERIC(10, 2) NOT NULL
         )
         """)
-
+        self.executar("""DROP TABLE IF EXISTS vendas""")
         self.executar("""
-        CREATE TABLE IF NOT EXISTS vendas (
+        CREATE TABLE vendas (
             id SERIAL PRIMARY KEY,
             produto_id INTEGER,
             nome_produto VARCHAR(100) NOT NULL,
@@ -168,6 +168,7 @@ class DatabaseManager:
         cursor.close()
         conexao.close()
 
+
     def atualizar_produto(self, produto_id, nome, quantidade, preco):
         query = """
         UPDATE produtos 
@@ -186,10 +187,15 @@ class DatabaseManager:
             INSERT INTO vendas (produto_id, nome_produto, quantidade, valor, data)
             VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP);
         """
+        query_atualizar_produto = """
+                UPDATE produtos
+                SET quantidade = quantidade - %s
+                WHERE id = %s;
+            """
         conexao = self.conectar_banco_de_dados()
         cursor = conexao.cursor()
         cursor.execute(query, (produto_id, nome_produto, quantidade, valor))
-        conexao.commit()
+        cursor.execute(query_atualizar_produto, (quantidade, produto_id))
         cursor.close()
         conexao.close()
 
@@ -197,4 +203,4 @@ class DatabaseManager:
 if __name__ == "__main__":
     db_url = "postgresql://info_db_lsba_user:cdItHM06j2EdUB4UOiRRK56GdbiFTvUT@dpg-d0v2q3h5pdvs7382be30-a.oregon-postgres.render.com/info_db_lsba"
     db = DatabaseManager(db_url)
-    #db.tabela("historico")
+    db.tabela("drop table vendas")

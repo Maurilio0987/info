@@ -145,27 +145,41 @@ def atualizar_produto():
         return jsonify({'status': 'erro', 'mensagem': str(e)})
 
 
+
 @app.route("/vendas")
+@login_required
 def vendas():
     produtos = db.tabela("produtos")
     return render_template("vendas.html", produtos=produtos)
 
+
 @app.route("/registrar_venda", methods=["POST"])
 @login_required
 def registrar_venda():
-    produto_id = request.form.get("produto")
-    nome_produto = request.form.get("nome_produto")
-    quantidade = int(request.form.get("quantidade"))
-    valor = float(request.form.get("valor"))
+    data = request.get_json()
 
-    id_usuario = db.usuario(session["usuario"])
+    produto_id = data.get("produto_id")
+    nome_produto = data.get("nome_produto")
+    quantidade = int(data.get("quantidade"))
+    preco_unitario = float(data.get("preco_unitario"))
 
-    db.registrar_venda(produto_id, nome_produto, quantidade, valor)
+    usuario_id = db.usuario(session["usuario"])
 
-    db.registrar_historico(id_usuario, "VENDA",
-        f"Venda de {quantidade}x {nome_produto} no valor de R$ {valor:.2f}")
+    try:
+        # Registrar a venda no banco de dados
+        db.registrar_venda(produto_id, nome_produto, quantidade, preco_unitario)
 
-    return redirect(url_for('vendas'))
+        # Registrar no histórico
+        db.registrar_historico(
+            usuario_id,
+            "VENDA",
+            f"Venda de {quantidade}x {nome_produto} por R$ {quantidade * preco_unitario:.2f}"
+        )
+
+        return jsonify({"status": "sucesso"})
+
+    except Exception as e:
+        return jsonify({"status": "erro", "erro": str(e)})
 
 
 

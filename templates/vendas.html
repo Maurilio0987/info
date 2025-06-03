@@ -11,7 +11,7 @@
             padding: 20px;
         }
         .container {
-            max-width: 1200px;
+            max-width: 600px;
             margin: 50px auto;
             background: white;
             padding: 30px;
@@ -53,7 +53,6 @@
             font-weight: bold;
             color: #555;
         }
-        input[type="text"],
         input[type="number"],
         select {
             width: 100%;
@@ -63,7 +62,6 @@
             box-sizing: border-box;
             transition: border 0.3s;
         }
-        input[type="text"]:focus,
         input[type="number"]:focus,
         select:focus {
             border-color: #6a0dad;
@@ -89,6 +87,12 @@
             margin-top: 20px;
             font-weight: bold;
         }
+        .info {
+            background: #f1f1f1;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
@@ -99,44 +103,74 @@
             <a class="menu-link" href="/principal"><i class="fas fa-arrow-left"></i> Voltar</a>
         </div>
 
-        <h2 style="color: #6a0dad;"><i class="fas fa-cart-plus"></i> Registrar Nova Venda</h2>
+        <div class="form-group">
+            <label for="produto"><i class="fas fa-box"></i> Produto</label>
+            <select id="produto" onchange="carregarInformacoes()" required>
+                <option value="" disabled selected>Selecione um produto</option>
+                {% for produto in produtos %}
+                    <!-- produto[0]=id, produto[1]=nome, produto[2]=quantidade, produto[3]=preco -->
+                    <option value="{{ produto[0] }}" data-quantidade="{{ produto[2] }}" data-preco="{{ produto[3] }}">
+                        {{ produto[1] }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
 
-        <form style="margin-bottom: 30px; background: #f9f9f9; padding: 25px; border-radius: 8px;">
-            <div class="form-group">
-                <label for="produto"><i class="fas fa-box"></i> Produto</label>
-                <select id="produto" required>
-                    <option value="" disabled selected>Selecione um produto</option>
-                    {% for produto in produtos %}
-                        <option value="{{ produto[0] }}">{{ produto[1] }}</option>
-                    {% endfor %}
-                </select>
+        <div id="detalhes" style="display: none;">
+            <div class="info">
+                <p><strong>Quantidade disponível:</strong> <span id="quantidadeDisponivel"></span></p>
+                <p><strong>Preço unitário:</strong> R$ <span id="precoUnitario"></span></p>
             </div>
 
             <div class="form-group">
-                <label for="quantidade"><i class="fas fa-hashtag"></i> Quantidade</label>
-                <input type="number" id="quantidade" required min="1" placeholder="Quantidade vendida">
-            </div>
-
-            <div class="form-group">
-                <label for="valor"><i class="fas fa-money-bill-wave"></i> Valor da Venda (R$)</label>
-                <input type="number" id="valor" required step="0.01" min="0" placeholder="0.00">
+                <label for="quantidade"><i class="fas fa-hashtag"></i> Quantidade da Venda</label>
+                <input type="number" id="quantidade" required min="1">
             </div>
 
             <button onclick="registrarVenda()"><i class="fas fa-check-circle"></i> Registrar Venda</button>
-        </form>
+        </div>
 
         <p id="mensagem"></p>
     </div>
 
     <script>
+        function carregarInformacoes() {
+            const select = document.getElementById("produto");
+            const option = select.options[select.selectedIndex];
+
+            if (!option.value) {
+                document.getElementById("detalhes").style.display = "none";
+                return;
+            }
+
+            const quantidadeDisponivel = option.getAttribute("data-quantidade");
+            const preco = option.getAttribute("data-preco");
+
+            document.getElementById("quantidadeDisponivel").innerText = quantidadeDisponivel;
+            document.getElementById("precoUnitario").innerText = parseFloat(preco).toFixed(2);
+
+            const quantidadeInput = document.getElementById("quantidade");
+            quantidadeInput.value = "";
+            quantidadeInput.max = quantidadeDisponivel;
+            quantidadeInput.min = 1;
+
+            document.getElementById("detalhes").style.display = "block";
+            document.getElementById("mensagem").innerText = "";
+        }
+
         function registrarVenda() {
             const select = document.getElementById("produto");
-            const produtoId = select.value;
-            const produtoNome = select.options[select.selectedIndex].text;
+            const option = select.options[select.selectedIndex];
+            const produtoId = option.value;
+            const produtoNome = option.text;
             const quantidade = document.getElementById("quantidade").value;
-            const valor = document.getElementById("valor").value;
+            const precoUnitario = option.getAttribute("data-preco");
 
-            // Disable button and show loading
+            if (!quantidade || quantidade < 1) {
+                alert("Por favor, informe uma quantidade válida.");
+                return;
+            }
+
             const button = document.querySelector("button");
             button.disabled = true;
             button.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Registrando...';
@@ -150,16 +184,31 @@
                     produto_id: produtoId,
                     nome_produto: produtoNome,
                     quantidade: quantidade,
-                    valor: valor
+                    preco_unitario: precoUnitario
                 })
             })
             .then(response => response.json())
             .then(data => {
                 const mensagem = document.getElementById("mensagem");
+
+                let quantidadeAtual = parseInt(option.getAttribute("data-quantidade"));
+                const quantidadeVendida = parseInt(quantidade);
+
                 if (data.status === "sucesso") {
+                    const novaQuantidade = quantidadeAtual - quantidadeVendida;
+                    option.setAttribute("data-quantidade", novaQuantidade);
+                    document.getElementById("quantidadeDisponivel").innerText = novaQuantidade;
+
                     mensagem.innerText = "Venda registrada com sucesso!";
                     mensagem.style.color = "green";
-                    document.querySelector("form").reset();
+
+                    if (novaQuantidade <= 0) {
+                        document.getElementById("detalhes").style.display = "none";
+                        select.value = "";
+                    } else {
+                        document.getElementById("quantidade").max = novaQuantidade;
+                        document.getElementById("quantidade").value = "";
+                    }
                 } else {
                     mensagem.innerText = "Erro ao registrar venda: " + data.erro;
                     mensagem.style.color = "red";
@@ -172,7 +221,7 @@
             })
             .finally(() => {
                 button.disabled = false;
-                button.textContent = "Registrar Venda";
+                button.innerHTML = '<i class="fas fa-check-circle"></i> Registrar Venda';
             });
         }
     </script>

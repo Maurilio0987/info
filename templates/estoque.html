@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Estoque</title>
+    <style>
+        table {
+            margin: auto;
+            border-collapse: collapse;
+            width: 80%;
+            background-color: white;
+        }
+        th, td {
+            border: 1px solid #999;
+            padding: 10px;
+            text-align: center;
+        }
+        .editable {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <a href="/principal">Voltar</a> <br>
+    <h1>Estoque</h1>
+
+    <h2 style="text-align: center;">Adicionar Produto</h2> <br>
+
+    <form id="form-produto">
+        <label>Nome do Produto:</label>
+        <input type="text" name="nome" id="nome" required> <br>
+        <label>Quantidade:</label>
+        <input type="number" name="quantidade" id="quantidade" min="1" required> <br>
+        <label>Preço:</label>
+        <input type="number" name="preco" id="preco" step="0.01" min="0" required> <br>
+        <input type="submit" value="Adicionar Produto" id="botao-submit">
+
+    </form>
+
+
+
+    <br>
+    <h2 style="text-align: center;">Atualizar Produto</h2> <br>
+
+    <form id="form-atualizar">
+        <label>Id:</label>
+        <input type="number" name="id" id="id" min="1" required> <br>
+        <label>Novo nome do produto(ou o mesmo):</label>
+        <input type="text" name="nome" id="nome-atualizar" required> <br>
+        <label>Nova Quantidade(ou a mesma):</label>
+        <input type="number" name="quantidade" id="quantidade-atualizar" min="1" required> <br>
+        <label>Novo Preço(ou o mesmo):</label>
+        <input type="number" name="preco" id="preco-atualizar" step="0.01" min="0" required> <br>
+        <input type="submit" value="Atualizar Produto" id="botao-submit-atualizar">
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Quantidade</th>
+                <th>Preço</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="tabela-produtos">
+            {% for produto in produtos %}
+            <tr>
+                <td>{{ produto[0] }}</td>
+                <td>{{ produto[1] }}</td>
+                <td>{{ produto[2] }}</td>
+                <td>R$ {{ "%.2f"|format(produto[3]) }}</td>
+                <td><button id="remover-{{ produto[0] }}" onclick="removerProduto({{ produto[0] }})">Remover</button></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+
+    <script>
+        const formAtualizar = document.getElementById('form-atualizar');
+        const botaoSubmitAtualizar = document.getElementById('botao-submit-atualizar');
+
+        formAtualizar.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            botaoSubmitAtualizar.disabled = true;
+            botaoSubmitAtualizar.value = "Atualizando...";
+
+            const id = document.getElementById('id').value;
+            const nome = document.getElementById('nome-atualizar').value;
+            const quantidade = document.getElementById('quantidade-atualizar').value;
+            const preco = document.getElementById('preco-atualizar').value;
+
+
+            try {
+                const resposta = await fetch('/atualizar_produto', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        id: id,
+                        nome: nome,
+                        quantidade: quantidade,
+                        preco: preco
+                    })
+                });
+
+                const resultado = await resposta.json();
+
+                if (resultado.status === 'sucesso') {
+                    atualizarTabela(resultado.produtos);
+                    formAtualizar.reset();
+                } else {
+                    alert('Erro ao atualizar produto: ' + resultado.mensagem);
+                }
+            } catch (error) {
+                alert('Erro de conexão ao atualizar produto.');
+            } finally {
+                botaoSubmitAtualizar.disabled = false;
+                botaoSubmitAtualizar.value = "Atualizar Produto";
+            }
+        });
+
+
+        const form = document.getElementById('form-produto');
+        const tabela = document.getElementById('tabela-produtos');
+        const botaoSubmit = document.getElementById('botao-submit');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Desabilita o botão para evitar múltiplos envios
+            botaoSubmit.disabled = true;
+            botaoSubmit.value = "Adicionando...";
+
+            const nome = document.getElementById('nome').value;
+            const quantidade = document.getElementById('quantidade').value;
+            const preco = document.getElementById('preco').value;
+
+            try {
+                const resposta = await fetch('/adicionar_produto', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nome: nome,
+                        quantidade: quantidade,
+                        preco: preco
+                    })
+                });
+
+                const resultado = await resposta.json();
+
+                if (resultado.status === 'sucesso') {
+                    atualizarTabela(resultado.produtos);
+                    form.reset();
+                } else {
+                    alert('Erro ao adicionar produto.');
+                }
+            } catch (error) {
+                alert('Erro de conexão.');
+            } finally {
+                // Reabilita o botão após a resposta
+                botaoSubmit.disabled = false;
+                botaoSubmit.value = "Adicionar Produto";
+            }
+        });
+
+        async function removerProduto(id) {
+            const botaoRemover = document.getElementById(`remover-${id}`);
+            botaoRemover.disabled = true;  // Desabilitar o botão enquanto a requisição é feita
+            botaoRemover.textContent = 'Removendo...';  // Trocar texto do botão para "Removendo..."
+
+            try {
+                const resposta = await fetch('/remover_produto', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id: id })
+                });
+
+                const resultado = await resposta.json();
+
+                if (resultado.status === 'sucesso') {
+                    atualizarTabela(resultado.produtos);  // Atualiza a tabela com os dados mais recentes
+                } else {
+                    alert('Erro ao remover produto: ' + resultado.mensagem);
+                }
+            } catch (erro) {
+                alert('Erro de conexão ao remover produto.');
+            } finally {
+                botaoRemover.disabled = false;  // Habilita o botão novamente
+                botaoRemover.textContent = 'Remover';  // Volta o texto original do botão
+            }
+        }
+
+
+        function atualizarTabela(produtos) {
+            tabela.innerHTML = '';
+            produtos.forEach(produto => {
+                const linha = document.createElement('tr');
+
+                const id = document.createElement('td');
+                id.textContent = produto[0];
+
+                const nome = document.createElement('td');
+                nome.textContent = produto[1];
+
+                const quantidade = document.createElement('td');
+                quantidade.textContent = produto[2];
+                quantidade.setAttribute("contenteditable", "true");
+                quantidade.addEventListener('blur', (e) => atualizarProduto(produto[0], 'quantidade', e.target.innerText));
+
+                const preco = document.createElement('td');
+                preco.textContent = 'R$ ' + parseFloat(produto[3]).toFixed(2);
+                preco.setAttribute("contenteditable", "true");
+                preco.addEventListener('blur', (e) => atualizarProduto(produto[0], 'preco', e.target.innerText));
+
+                const acoes = document.createElement('td');
+                const botaoRemover = document.createElement('button');
+                botaoRemover.textContent = 'Remover';
+                botaoRemover.onclick = () => removerProduto(produto[0]);
+                acoes.appendChild(botaoRemover);
+
+                linha.appendChild(id);
+                linha.appendChild(nome);
+                linha.appendChild(quantidade);
+                linha.appendChild(preco);
+                linha.appendChild(acoes);
+
+                tabela.appendChild(linha);
+            });
+        }
+    </script>
+</body>
+</html>

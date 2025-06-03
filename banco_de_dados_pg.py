@@ -23,7 +23,37 @@ class DatabaseManager:
         )
         """)
 
-        
+        self.executar("""
+        CREATE TABLE IF NOT EXISTS produtos (
+            id SERIAL PRIMARY KEY,
+            nome VARCHAR(100) NOT NULL,
+            quantidade INTEGER NOT NULL,
+            preco NUMERIC(10, 2) NOT NULL
+        )
+        """)
+
+        self.executar("""
+        CREATE TABLE IF NOT EXISTS vendas (
+            id SERIAL PRIMARY KEY,
+            produto_id INTEGER,
+            nome_produto VARCHAR(100) NOT NULL,
+            valor NUMERIC(10, 2) NOT NULL,
+            quantidade INTEGER NOT NULL,
+            data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE SET NULL
+        );
+        """)
+
+        self.executar("""
+        CREATE TABLE IF NOT EXISTS historico (
+            id SERIAL PRIMARY KEY,
+            usuario_id INTEGER,
+            acao VARCHAR(100),
+            descricao TEXT,
+            data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            CONSTRAINT fk_usuario_id FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+        );
+        """)
         
         
     def conectar_banco_de_dados(self):
@@ -110,7 +140,61 @@ class DatabaseManager:
         conexão.close()
         return linhas
 
+    def registrar_historico(self, usuario_id, acao, descricao):
+        query = "INSERT INTO historico (usuario_id, acao, descricao) VALUES (%s, %s, %s);"
+
+        conexao = self.conectar_banco_de_dados()
+        cursor = conexao.cursor()
+        cursor.execute(query, (usuario_id, acao, descricao))
+        cursor.close()
+        conexao.close()
+
+
+    def adicionar_produto(self, nome, quantidade, preco):
+        query = "INSERT INTO produtos (nome, quantidade, preco) VALUES (%s, %s, %s);"
+
+        conexao = self.conectar_banco_de_dados()
+        cursor = conexao.cursor()
+        cursor.execute(query, (nome, quantidade, preco))
+        cursor.close()
+        conexao.close()
+
+    def remover_produto(self, produto_id):
+        query = "DELETE FROM produtos WHERE id = %s;"
+
+        conexao = self.conectar_banco_de_dados()
+        cursor = conexao.cursor()
+        cursor.execute(query, (produto_id,))
+        cursor.close()
+        conexao.close()
+
+    def atualizar_produto(self, produto_id, nome, quantidade, preco):
+        query = """
+        UPDATE produtos 
+        SET nome = %s, quantidade = %s, preco = %s 
+        WHERE id = %s;
+        """
+
+        conexao = self.conectar_banco_de_dados()
+        cursor = conexao.cursor()
+        cursor.execute(query, (nome, quantidade, preco, produto_id))
+        cursor.close()
+        conexao.close()
+
+    def registrar_venda(self, produto_id, nome_produto, quantidade, valor):
+        query = """
+            INSERT INTO vendas (produto_id, nome_produto, quantidade, valor, data)
+            VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP);
+        """
+        conexao = self.conectar_banco_de_dados()
+        cursor = conexao.cursor()
+        cursor.execute(query, (produto_id, nome_produto, quantidade, valor))
+        conexao.commit()
+        cursor.close()
+        conexao.close()
+
 
 if __name__ == "__main__":
-    pass
-    
+    db_url = "postgresql://info_db_lsba_user:cdItHM06j2EdUB4UOiRRK56GdbiFTvUT@dpg-d0v2q3h5pdvs7382be30-a.oregon-postgres.render.com/info_db_lsba"
+    db = DatabaseManager(db_url)
+    #db.tabela("historico")

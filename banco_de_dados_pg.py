@@ -13,7 +13,7 @@ class DatabaseManager:
     def __init__(self, db_url):
         self.db_url = db_url
     
-
+        self.executar("""SET TIME ZONE 'America/Sao_Paulo'""")
         self.executar("""
         CREATE TABLE IF NOT EXISTS usuarios (
             id SERIAL PRIMARY KEY,
@@ -23,20 +23,21 @@ class DatabaseManager:
         )
         """)
 
+        
         self.executar("""
         CREATE TABLE IF NOT EXISTS produtos (
             id SERIAL PRIMARY KEY,
             nome VARCHAR(100) NOT NULL,
             quantidade INTEGER NOT NULL,
-            preco NUMERIC(10, 2) NOT NULL
+            preco_compra NUMERIC(10, 2) NOT NULL,
+            preco_venda NUMERIC(10, 2) NOT NULL
         )
         """)
-        self.executar("""DROP TABLE IF EXISTS vendas""")
+
         self.executar("""
-        CREATE TABLE vendas (
+        CREATE TABLE IF NOT EXISTS vendas (
             id SERIAL PRIMARY KEY,
             produto_id INTEGER,
-            nome_produto VARCHAR(100) NOT NULL,
             valor NUMERIC(10, 2) NOT NULL,
             quantidade INTEGER NOT NULL,
             data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -150,12 +151,12 @@ class DatabaseManager:
         conexao.close()
 
 
-    def adicionar_produto(self, nome, quantidade, preco):
-        query = "INSERT INTO produtos (nome, quantidade, preco) VALUES (%s, %s, %s);"
+    def adicionar_produto(self, nome, quantidade, preco_compra, preco_venda):
+        query = "INSERT INTO produtos (nome, quantidade, preco_compra, preco_venda) VALUES (%s, %s, %s, %s);"
 
         conexao = self.conectar_banco_de_dados()
         cursor = conexao.cursor()
-        cursor.execute(query, (nome, quantidade, preco))
+        cursor.execute(query, (nome, quantidade, preco_compra, preco_venda))
         cursor.close()
         conexao.close()
 
@@ -169,23 +170,23 @@ class DatabaseManager:
         conexao.close()
 
 
-    def atualizar_produto(self, produto_id, nome, quantidade, preco):
+    def atualizar_produto(self, produto_id, nome, quantidade, preco_compra, preco_venda):
         query = """
         UPDATE produtos 
-        SET nome = %s, quantidade = %s, preco = %s 
+        SET nome = %s, quantidade = %s, preco_compra = %s, preco_venda = %s
         WHERE id = %s;
         """
 
         conexao = self.conectar_banco_de_dados()
         cursor = conexao.cursor()
-        cursor.execute(query, (nome, quantidade, preco, produto_id))
+        cursor.execute(query, (nome, quantidade, preco_compra, preco_venda, produto_id))
         cursor.close()
         conexao.close()
 
-    def registrar_venda(self, produto_id, nome_produto, quantidade, valor):
+    def registrar_venda(self, produto_id, quantidade, valor):
         query = """
-            INSERT INTO vendas (produto_id, nome_produto, quantidade, valor, data)
-            VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP);
+            INSERT INTO vendas (produto_id, quantidade, valor, data)
+            VALUES (%s, %s, %s, CURRENT_TIMESTAMP);
         """
         query_atualizar_produto = """
                 UPDATE produtos
@@ -194,7 +195,7 @@ class DatabaseManager:
             """
         conexao = self.conectar_banco_de_dados()
         cursor = conexao.cursor()
-        cursor.execute(query, (produto_id, nome_produto, quantidade, valor))
+        cursor.execute(query, (produto_id, quantidade, valor))
         cursor.execute(query_atualizar_produto, (quantidade, produto_id))
         cursor.close()
         conexao.close()
@@ -203,4 +204,5 @@ class DatabaseManager:
 if __name__ == "__main__":
     db_url = "postgresql://info_db_lsba_user:cdItHM06j2EdUB4UOiRRK56GdbiFTvUT@dpg-d0v2q3h5pdvs7382be30-a.oregon-postgres.render.com/info_db_lsba"
     db = DatabaseManager(db_url)
-    db.tabela("drop table vendas")
+    
+    db.adicionar_produto("teste", 3, 3, 3)

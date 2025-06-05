@@ -90,7 +90,6 @@ def estoque():
     produtos = db.tabela("produtos")
     return render_template("estoque.html", produtos=produtos)
 
-
 @app.route("/adicionar_produto", methods=["POST"])
 @login_required
 def adicionar_produto():
@@ -100,14 +99,20 @@ def adicionar_produto():
 
     nome = data.get("nome")
     quantidade = int(data.get("quantidade"))
-    preco = float(data.get("preco"))
+    preco_compra = float(data.get("preco_compra"))
+    preco_venda = float(data.get("preco_venda"))
 
-    db.adicionar_produto(nome, quantidade, preco)
-    db.registrar_historico(id_usuario, "ADIÇÃO", f"{quantidade} unidades de {nome} custando {preco}")
+    db.adicionar_produto(nome, quantidade, preco_compra, preco_venda)
+    db.registrar_historico(
+        id_usuario,
+        "ADIÇÃO",
+        f"{quantidade} unidades de {nome} (compra: {preco_compra}, venda: {preco_venda})"
+    )
 
     produtos = db.tabela("produtos")
 
     return jsonify({"status": "sucesso", "produtos": produtos})
+
 
 
 @app.route("/remover_produto", methods=["POST"])
@@ -126,23 +131,32 @@ def remover_produto():
     except Exception as e:
         return jsonify({'status': 'erro', 'mensagem': str(e)})
 
+
 @app.route('/atualizar_produto', methods=['POST'])
+@login_required
 def atualizar_produto():
     dados = request.get_json()
     id_usuario = db.usuario(session["usuario"])
+
     produto_id = dados.get('id')
     nome = dados.get('nome')
-    quantidade = dados.get('quantidade')
-    preco = dados.get('preco')
+    quantidade = int(dados.get('quantidade'))
+    preco_compra = float(dados.get('preco_compra'))
+    preco_venda = float(dados.get('preco_venda'))
 
     try:
-        db.atualizar_produto(produto_id, nome, quantidade, preco)
-        db.registrar_historico(id_usuario, "ATUALIZAÇÃO", f"produto {produto_id} foi foi atualizado para {nome}, {quantidade}, {preco}")
+        db.atualizar_produto(produto_id, nome, quantidade, preco_compra, preco_venda)
+        db.registrar_historico(
+            id_usuario,
+            "ATUALIZAÇÃO",
+            f"Produto ID {produto_id} atualizado para {nome}, {quantidade} unidades, compra: {preco_compra}, venda: {preco_venda}"
+        )
         produtos = db.tabela('produtos')
         return jsonify({'status': 'sucesso', 'produtos': produtos})
     except Exception as e:
         print(e)
         return jsonify({'status': 'erro', 'mensagem': str(e)})
+
 
 
 
@@ -159,21 +173,20 @@ def registrar_venda():
     data = request.get_json()
 
     produto_id = data.get("produto_id")
-    nome_produto = data.get("nome_produto")
     quantidade = int(data.get("quantidade"))
-    preco_unitario = float(data.get("preco_unitario"))
-
+    preco = float(data.get("preco"))
+    print(quantidade, preco)
     usuario_id = db.usuario(session["usuario"])
 
     try:
         # Registrar a venda no banco de dados
-        db.registrar_venda(produto_id, nome_produto, quantidade, preco_unitario)
+        db.registrar_venda(produto_id, quantidade, preco)
 
         # Registrar no histórico
         db.registrar_historico(
             usuario_id,
             "VENDA",
-            f"Venda de {quantidade}x {nome_produto} por R$ {quantidade * preco_unitario:.2f}"
+            f"{produto_id}|{quantidade}|{preco}"
         )
 
         return jsonify({"status": "sucesso"})
@@ -190,7 +203,14 @@ def historico():
     historico = db.tabela("historico")
     return render_template("historico.html", historico=historico)
 
-#app.run(debug=True, host="10.177.1.28", port=80)
+@app.route("/financeiro")
+@login_required
+def financeiro():
+    vendas = db.tabela("vendas")
+    return render_template("financeiro.html", vendas=vendas)
+
+
+#app.run(debug=True, host="localhost", port=8000)
 
 
 if __name__ == "__main__":

@@ -24,25 +24,26 @@
 </head>
 <body>
     <a href="/principal">Voltar</a>
-    <h2>Vendas</h2>
+    <h2>Vendas</h2> <br>
+    saldo={{ saldo }} <br>
+    despesas={{ despesas }} <br>
+    lucro={{ lucro }} <br>
     <table>
         <thead>
             <tr>
-                <th>ID</th>
-                <th>ID Produto</th>
+                <th>Produto</th>
                 <th>Valor</th>
                 <th>Quantidade</th>
                 <th>Data</th>
             </tr>
         </thead>
         <tbody>
-            {% for item in vendas %}
+            {% for item in tabela %}
             <tr>
                 <td>{{ item[0] }}</td>
                 <td>{{ item[1] }}</td>
                 <td>{{ item[2] }}</td>
                 <td>{{ item[3] }}</td>
-                <td>{{ item[4] }}</td>
             </tr>
             {% endfor %}
         </tbody>

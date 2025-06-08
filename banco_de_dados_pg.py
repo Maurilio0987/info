@@ -200,9 +200,34 @@ class DatabaseManager:
         cursor.close()
         conexao.close()
 
+    def vendas(self):
+        query_vendas = """SELECT 
+                            produtos.nome,
+                            vendas.valor,
+                            vendas.quantidade,
+                            vendas.data
+                        FROM vendas
+                        JOIN produtos ON produtos.id=vendas.produto_id"""
+        query_valor = """SELECT 
+                            SUM(vendas.valor*vendas.quantidade), 
+                            SUM(produtos.preco_compra*vendas.quantidade),
+                            SUM((vendas.valor-produtos.preco_compra)*vendas.quantidade) 
+                        FROM vendas
+                        JOIN produtos ON produtos.id=vendas.produto_id"""
+
+
+        conexao = self.conectar_banco_de_dados()
+        cursor = conexao.cursor()
+        cursor.execute(query_vendas)
+        tabela = cursor.fetchall()
+        cursor.execute(query_valor)
+        
+        saldo, despesas, lucro = cursor.fetchone()
+        return [saldo, despesas, lucro, tabela]
+
+
 
 if __name__ == "__main__":
     db_url = "postgresql://info_db_lsba_user:cdItHM06j2EdUB4UOiRRK56GdbiFTvUT@dpg-d0v2q3h5pdvs7382be30-a.oregon-postgres.render.com/info_db_lsba"
     db = DatabaseManager(db_url)
     
-    db.adicionar_produto("teste", 3, 3, 3)

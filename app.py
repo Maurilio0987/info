@@ -106,7 +106,7 @@ def adicionar_produto():
     db.registrar_historico(
         id_usuario,
         "ADIÇÃO",
-        f"{quantidade} unidades de {nome} (compra: {preco_compra}, venda: {preco_venda})"
+        f"{nome}|{quantidade}|{preco_compra}|{preco_venda})"
     )
 
     produtos = db.tabela("produtos")
@@ -125,7 +125,7 @@ def remover_produto():
 
     try:
         db.remover_produto(produto_id)
-        db.registrar_historico(id_usuario, "REMOÇÃO", f"produto {produto_id} foi removido")
+        db.registrar_historico(id_usuario, "REMOÇÃO", f"{produto_id}")
         produtos = db.tabela("produtos")
         return jsonify({'status': 'sucesso', 'produtos': produtos})
     except Exception as e:
@@ -149,7 +149,7 @@ def atualizar_produto():
         db.registrar_historico(
             id_usuario,
             "ATUALIZAÇÃO",
-            f"Produto ID {produto_id} atualizado para {nome}, {quantidade} unidades, compra: {preco_compra}, venda: {preco_venda}"
+            f"{produto_id}|{nome}|{quantidade}|{preco_compra}|{preco_venda}"
         )
         produtos = db.tabela('produtos')
         return jsonify({'status': 'sucesso', 'produtos': produtos})
@@ -175,7 +175,6 @@ def registrar_venda():
     produto_id = data.get("produto_id")
     quantidade = int(data.get("quantidade"))
     preco = float(data.get("preco"))
-    print(quantidade, preco)
     usuario_id = db.usuario(session["usuario"])
 
     try:
@@ -195,8 +194,6 @@ def registrar_venda():
         return jsonify({"status": "erro", "erro": str(e)})
 
 
-
-
 @app.route("/historico")
 @login_required
 def historico():
@@ -206,13 +203,13 @@ def historico():
 @app.route("/financeiro")
 @login_required
 def financeiro():
-    faturamento, despesas, lucro, tabela = db.vendas()
-    return render_template("financeiro.html", tabela=tabela, faturamento=faturamento, despesas=despesas, lucro=lucro)
+    faturamento, despesas, lucro, tabela_vendas, tabela_produtos = db.vendas()
+    return render_template("financeiro.html", tabela_vendas=tabela_vendas, tabela_produtos=tabela_produtos, faturamento=faturamento, despesas=despesas, lucro=lucro)
 
 
-app.run(debug=True, host="localhost", port=8000)
+#app.run(debug=True, host="localhost", port=8000)
 
 
-#if __name__ == "__main__":
-#    port = int(os.environ.get("PORT", 5000))
-#    app.run(host="0.0.0.0", port=port)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)

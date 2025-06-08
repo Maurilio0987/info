@@ -208,22 +208,40 @@ class DatabaseManager:
                             vendas.data
                         FROM vendas
                         JOIN produtos ON produtos.id=vendas.produto_id"""
+        
         query_valor = """SELECT 
-                            SUM(vendas.valor*vendas.quantidade), 
+                            SUM(vendas.valor), 
                             SUM(produtos.preco_compra*vendas.quantidade),
-                            SUM((vendas.valor-produtos.preco_compra)*vendas.quantidade) 
+                            SUM(vendas.valor)-SUM(produtos.preco_compra*vendas.quantidade) 
                         FROM vendas
                         JOIN produtos ON produtos.id=vendas.produto_id"""
+
+        query_produtos = """SELECT 
+                            produtos.nome, 
+                            produtos.preco_compra,
+                            produtos.preco_venda,
+                            ROUND(AVG(vendas.valor/vendas.quantidade), 2),
+                            SUM(vendas.quantidade),
+                            SUM(vendas.valor),
+                            SUM(vendas.valor)-SUM(produtos.preco_compra*vendas.quantidade) 
+                        FROM vendas
+                        JOIN produtos ON produtos.id=vendas.produto_id
+                        GROUP BY produtos.nome, produtos.preco_compra, produtos.preco_venda"""
 
 
         conexao = self.conectar_banco_de_dados()
         cursor = conexao.cursor()
-        cursor.execute(query_vendas)
-        tabela = cursor.fetchall()
-        cursor.execute(query_valor)
         
+        cursor.execute(query_vendas)
+        tabela_vendas = cursor.fetchall()
+        
+        cursor.execute(query_produtos)
+        tabela_produtos = cursor.fetchall()
+        
+        cursor.execute(query_valor)
         faturamento, despesas, lucro = cursor.fetchone()
-        return [faturamento, despesas, lucro, tabela]
+        
+        return [faturamento, despesas, lucro, tabela_vendas, tabela_produtos]
 
 
 

@@ -82,9 +82,43 @@
     
     <div class="stats">
         <span><i class="fas fa-wallet"></i> Faturamento: R$ {{ faturamento }}</span>
-        <span><i class="fas fa-money-bill-wave"></i> Despesas: R$ {{ despesas }}</span>
-        <span><i class="fas fa-hand-holding-usd"></i> Lucro: R$ {{ lucro }}</span>
+        <span style="color: red"><i class="fas fa-money-bill-wave"></i> Despesas: R$ {{ despesas }}</span>
+        <span style="color: green"><i class="fas fa-hand-holding-usd"></i> Lucro: R$ {{ lucro }}</span>
     </div>
+    <div class="header" style="margin-top: 30px; margin-bottom: 15px;">
+        <h2 style="font-size: 22px;"><i class="fas fa-box-open"></i> PRODUTOS</h2>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Produto</th>
+                <th>Preço unitário de Compra</th>
+                <th>Preço unitário de venda</th>
+                <th>Preço medio de venda</th>
+                <th>Quantidade vendida</th>
+                <th>Faturamento</th>
+                <th>Lucro</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in tabela_produtos %}
+            <tr>
+                <td>{{ item[0] }}</td>
+                <td>{{ item[1] }}</td>
+                <td>{{ item[2] }}</td>
+                <td>{{ item[3] }}</td>
+                <td>{{ item[4] }}</td>
+                <td>{{ item[5] }}</td>
+                <td>{{ item[6] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="header" style="margin-top: 30px; margin-bottom: 15px;">
+        <h2 style="font-size: 22px;"><i class="fas fa-shopping-cart"></i> VENDAS</h2>
+    </div>
+
     <table>
         <thead>
             <tr>
@@ -95,7 +129,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for item in tabela %}
+            {% for item in tabela_vendas %}
             <tr>
                 <td>{{ item[0] }}</td>
                 <td>{{ item[1] }}</td>

@@ -124,7 +124,12 @@
 
             <div class="form-group">
                 <label for="quantidade"><i class="fas fa-hashtag"></i> Quantidade da Venda</label>
-                <input type="number" id="quantidade" required min="1">
+                <input type="number" id="quantidade" required min="1" onchange="precoSugerido()">
+            </div>
+
+            <div class="form-group">
+                <label for="preco"><i class="fas fa-hashtag"></i> Valor Total:</label>
+                <input type="number" id="preco" required min="1">
             </div>
 
             <button onclick="registrarVenda()"><i class="fas fa-check-circle"></i> Registrar Venda</button>
@@ -149,6 +154,7 @@
             document.getElementById("quantidadeDisponivel").innerText = quantidadeDisponivel;
             document.getElementById("precoUnitario").innerText = parseFloat(preco).toFixed(2);
 
+
             const quantidadeInput = document.getElementById("quantidade");
             quantidadeInput.value = "";
             quantidadeInput.max = quantidadeDisponivel;
@@ -158,12 +164,22 @@
             document.getElementById("mensagem").innerText = "";
         }
 
+        function precoSugerido() {
+            const select = document.getElementById("produto");
+            const option = select.options[select.selectedIndex];
+            const preco = option.getAttribute("data-preco");
+            const precoInput = document.getElementById("preco");
+            const quantidade = document.getElementById("quantidade").value;
+
+            precoInput.placeholder = "Preço sugerido: R$ " + String(parseFloat(quantidade*preco).toFixed(2));
+        }
+
         function registrarVenda() {
             const select = document.getElementById("produto");
             const option = select.options[select.selectedIndex];
             const produtoId = option.value;
             const quantidade = document.getElementById("quantidade").value;
-            const preco = Number(option.getAttribute("data-preco"));
+            const preco = document.getElementById("preco").value;
             const estoque = Number(option.getAttribute("data-quantidade"));
             
             if (!quantidade || quantidade < 1 || estoque < quantidade) {

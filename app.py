@@ -206,8 +206,8 @@ def historico():
 @app.route("/financeiro")
 @login_required
 def financeiro():
-    saldo, despesas, lucro, tabela = db.vendas()
-    return render_template("financeiro.html", tabela=tabela, despesas=despesas, saldo=saldo, lucro=lucro)
+    faturamento, despesas, lucro, tabela = db.vendas()
+    return render_template("financeiro.html", tabela=tabela, faturamento=faturamento, despesas=despesas, lucro=lucro)
 
 
 app.run(debug=True, host="localhost", port=8000)

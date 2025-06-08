@@ -222,8 +222,8 @@ class DatabaseManager:
         tabela = cursor.fetchall()
         cursor.execute(query_valor)
         
-        saldo, despesas, lucro = cursor.fetchone()
-        return [saldo, despesas, lucro, tabela]
+        faturamento, despesas, lucro = cursor.fetchone()
+        return [faturamento, despesas, lucro, tabela]
 
 
 

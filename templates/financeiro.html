@@ -1,33 +1,90 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title></title>
+    <title>Relatório de Vendas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f5ff;
+            color: #1a1a1a;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #6a0dad;
+            font-size: 28px;
+            margin: 0;
+        }
+        a {
+            color: #6a0dad;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        a:hover {
+            color: #4b0082;
+        }
+        .stats {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .stats span {
+            margin-right: 20px;
+        }
+        .stats i {
+            margin-right: 8px;
+            color: #6a0dad;
         }
         table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             margin-top: 20px;
             background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        th, td {
-            padding: 8px;
+        th {
+            background-color: #6a0dad;
+            color: white;
+            padding: 12px 15px;
             text-align: left;
-            border: 1px solid #ddd;
+        }
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f2e6ff;
         }
 
     </style>
 </head>
 <body>
-    <a href="/principal">Voltar</a>
-    <h2>Vendas</h2> <br>
-    saldo={{ saldo }} <br>
-    despesas={{ despesas }} <br>
-    lucro={{ lucro }} <br>
+    <div class="header">
+        <a href="/principal"><i class="fas fa-arrow-left"></i> Voltar</a>
+        <h2><i class="fas fa-chart-line"></i> Financeiro</h2>
+    </div>
+    
+    <div class="stats">
+        <span><i class="fas fa-wallet"></i> Faturamento: R$ {{ faturamento }}</span>
+        <span><i class="fas fa-money-bill-wave"></i> Despesas: R$ {{ despesas }}</span>
+        <span><i class="fas fa-hand-holding-usd"></i> Lucro: R$ {{ lucro }}</span>
+    </div>
     <table>
         <thead>
             <tr>

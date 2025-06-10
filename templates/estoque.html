@@ -184,7 +184,7 @@
                 <th>Quantidade</th>
                 <th>Preço de compra</th>
                 <th>Preço de venda</th>
-                <th></th>
+                <!--<th></th>-->
             </tr>
         </thead>
         <tbody id="tabela-produtos">
@@ -195,7 +195,7 @@
                 <td>{{ produto[2] }}</td>
                 <td>R$ {{ "%.2f"|format(produto[3]) }}</td>
                 <td>R$ {{ "%.2f"|format(produto[4]) }}</td>
-                <td><button id="remover-{{ produto[0] }}" onclick="removerProduto({{ produto[0] }})">Remover</button></td>
+                <!--<td><button id="remover-{{ produto[0] }}" onclick="removerProduto({{ produto[0] }})">Remover</button></td>-->
             </tr>
             {% endfor %}
         </tbody>

@@ -106,7 +106,7 @@ def adicionar_produto():
     db.registrar_historico(
         id_usuario,
         "ADIÇÃO",
-        f"{nome}|{quantidade}|{preco_compra}|{preco_venda})"
+        f"{nome}|{quantidade}|{preco_compra}|{preco_venda}"
     )
 
     produtos = db.tabela("produtos")
@@ -171,27 +171,34 @@ def vendas():
 @login_required
 def registrar_venda():
     data = request.get_json()
-
-    produto_id = data.get("produto_id")
-    quantidade = int(data.get("quantidade"))
-    preco = float(data.get("preco"))
     usuario_id = db.usuario(session["usuario"])
 
-    try:
-        # Registrar a venda no banco de dados
-        db.registrar_venda(produto_id, quantidade, preco)
+    produtos = data.get("vendas", [])
 
-        # Registrar no histórico
-        db.registrar_historico(
-            usuario_id,
-            "VENDA",
-            f"{produto_id}|{quantidade}|{preco}"
-        )
+    if not produtos:
+        return jsonify({"status": "erro", "erro": "Nenhum produto recebido."})
+
+    try:
+        for item in produtos:
+            produto_id = int(item.get("produto_id"))
+            quantidade = int(item.get("quantidade"))
+            preco = float(item.get("preco"))
+
+            # Registrar cada venda no banco
+            db.registrar_venda(produto_id, quantidade, preco)
+
+            # Registrar no histórico
+            db.registrar_historico(
+                usuario_id,
+                "VENDA",
+                f"{produto_id}|{quantidade}|{preco}"
+            )
 
         return jsonify({"status": "sucesso"})
 
     except Exception as e:
         return jsonify({"status": "erro", "erro": str(e)})
+
 
 
 @app.route("/historico")
@@ -207,7 +214,7 @@ def financeiro():
     return render_template("financeiro.html", tabela_vendas=tabela_vendas, tabela_produtos=tabela_produtos, faturamento=faturamento, despesas=despesas, lucro=lucro)
 
 
-#app.run(debug=True, host="localhost", port=8000)
+#app.run(debug=True, host="localhost", port=9000)
 
 
 if __name__ == "__main__":

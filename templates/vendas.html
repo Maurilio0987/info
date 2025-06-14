@@ -93,6 +93,18 @@
             border-radius: 4px;
             margin-bottom: 15px;
         }
+        .remover-btn {
+            background-color: #e74c3c;
+            margin-top: 10px;
+        }
+        .produto-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            background-color: #fafafa;
+        }
     </style>
 </head>
 <body>
@@ -103,134 +115,156 @@
             <a class="menu-link" href="/principal"><i class="fas fa-arrow-left"></i> Voltar</a>
         </div>
 
-        <div class="form-group">
-            <label for="produto"><i class="fas fa-box"></i> Produto</label>
-            <select id="produto" onchange="carregarInformacoes()" required>
-                <option value="" disabled selected>Selecione um produto</option>
-                {% for produto in produtos %}
-                    <!-- produto[0]=id, produto[1]=nome, produto[2]=quantidade, produto[3]=preco -->
-                    <option value="{{ produto[0] }}" data-quantidade="{{ produto[2] }}" data-preco="{{ produto[4] }}">
-                        {{ produto[1] }}
-                    </option>
-                {% endfor %}
-            </select>
+        <div id="produtosContainer">
+            <div class="produto-item">
+                <div class="form-group">
+                    <label><i class="fas fa-box"></i> Produto</label>
+                    <select onchange="carregarInformacoes(this)" required>
+                        <option value="" disabled selected>Selecione um produto</option>
+                        {% for produto in produtos %}
+                        <option value="{{ produto[0] }}" data-quantidade="{{ produto[2] }}" data-preco="{{ produto[4] }}">
+                            {{ produto[1] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="detalhes" style="display: none;">
+                    <div class="info">
+                        <p><strong>Quantidade disponível:</strong> <span class="quantidadeDisponivel"></span></p>
+                        <p><strong>Preço unitário de venda:</strong> R$ <span class="precoUnitario"></span></p>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-hashtag"></i> Quantidade da Venda</label>
+                        <input type="number" class="quantidade" required min="1" onchange="precoSugerido(this)">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-hashtag"></i> Valor Total:</label>
+                        <input type="number" class="preco" required min="1">
+                    </div>
+
+                    <button type="button" class="remover-btn" onclick="removerProduto(this)"><i class="fas fa-trash"></i> Remover este produto</button>
+                </div>
+            </div>
         </div>
 
-        <div id="detalhes" style="display: none;">
-            <div class="info">
-                <p><strong>Quantidade disponível:</strong> <span id="quantidadeDisponivel"></span></p>
-                <p><strong>Preço unitário de venda:</strong> R$ <span id="precoUnitario"></span></p>
-            </div>
+        <button type="button" onclick="adicionarProduto()"><i class="fas fa-plus"></i> Adicionar outro produto</button>
 
-            <div class="form-group">
-                <label for="quantidade"><i class="fas fa-hashtag"></i> Quantidade da Venda</label>
-                <input type="number" id="quantidade" required min="1" onchange="precoSugerido()">
-            </div>
-
-            <div class="form-group">
-                <label for="preco"><i class="fas fa-hashtag"></i> Valor Total:</label>
-                <input type="number" id="preco" required min="1">
-            </div>
-
-            <button onclick="registrarVenda()"><i class="fas fa-check-circle"></i> Registrar Venda</button>
-        </div>
+        <button onclick="registrarVenda()"><i class="fas fa-check-circle"></i> Registrar Venda</button>
 
         <p id="mensagem"></p>
     </div>
 
     <script>
-        function carregarInformacoes() {
-            const select = document.getElementById("produto");
-            const option = select.options[select.selectedIndex];
+        function carregarInformacoes(selectElement) {
+            const option = selectElement.options[selectElement.selectedIndex];
+            const container = selectElement.closest(".produto-item");
 
             if (!option.value) {
-                document.getElementById("detalhes").style.display = "none";
+                container.querySelector(".detalhes").style.display = "none";
                 return;
             }
 
             const quantidadeDisponivel = option.getAttribute("data-quantidade");
             const preco = option.getAttribute("data-preco");
 
-            document.getElementById("quantidadeDisponivel").innerText = quantidadeDisponivel;
-            document.getElementById("precoUnitario").innerText = parseFloat(preco).toFixed(2);
+            container.querySelector(".quantidadeDisponivel").innerText = quantidadeDisponivel;
+            container.querySelector(".precoUnitario").innerText = parseFloat(preco).toFixed(2);
 
-
-            const quantidadeInput = document.getElementById("quantidade");
+            const quantidadeInput = container.querySelector(".quantidade");
             quantidadeInput.value = "";
             quantidadeInput.max = quantidadeDisponivel;
             quantidadeInput.min = 1;
 
-            document.getElementById("detalhes").style.display = "block";
-            document.getElementById("mensagem").innerText = "";
+            container.querySelector(".detalhes").style.display = "block";
         }
 
-        function precoSugerido() {
-            const select = document.getElementById("produto");
+        function precoSugerido(inputElement) {
+            const container = inputElement.closest(".produto-item");
+            const select = container.querySelector("select");
             const option = select.options[select.selectedIndex];
             const preco = option.getAttribute("data-preco");
-            const precoInput = document.getElementById("preco");
-            const quantidade = document.getElementById("quantidade").value;
+            const quantidade = inputElement.value;
 
-            precoInput.placeholder = "Preço sugerido: R$ " + String(parseFloat(quantidade*preco).toFixed(2));
+            const precoInput = container.querySelector(".preco");
+            precoInput.placeholder = "Preço sugerido: R$ " + String(parseFloat(quantidade * preco).toFixed(2));
+        }
+
+        function adicionarProduto() {
+            const container = document.getElementById("produtosContainer");
+            const novoProduto = container.querySelector(".produto-item").cloneNode(true);
+
+            const select = novoProduto.querySelector("select");
+            select.value = "";
+
+            novoProduto.querySelector(".detalhes").style.display = "none";
+            novoProduto.querySelector(".quantidadeDisponivel").innerText = "";
+            novoProduto.querySelector(".precoUnitario").innerText = "";
+            novoProduto.querySelector(".quantidade").value = "";
+            novoProduto.querySelector(".preco").value = "";
+            novoProduto.querySelector(".preco").placeholder = "";
+
+            container.appendChild(novoProduto);
+        }
+
+        function removerProduto(buttonElement) {
+            const container = document.getElementById("produtosContainer");
+            const produtoItem = buttonElement.closest(".produto-item");
+
+            if (container.querySelectorAll(".produto-item").length > 1) {
+                container.removeChild(produtoItem);
+            } else {
+                alert("Pelo menos um produto deve permanecer.");
+            }
         }
 
         function registrarVenda() {
-            const select = document.getElementById("produto");
-            const option = select.options[select.selectedIndex];
-            const produtoId = option.value;
-            const quantidade = document.getElementById("quantidade").value;
-            const preco = document.getElementById("preco").value;
-            const estoque = Number(option.getAttribute("data-quantidade"));
-            
-            if (!quantidade || quantidade < 1 || estoque < quantidade) {
-                
-                alert("Por favor, informe uma quantidade válida.");
+            const produtos = [];
+            document.querySelectorAll(".produto-item").forEach(function(item) {
+                const select = item.querySelector("select");
+                const option = select.options[select.selectedIndex];
+                const produtoId = option.value;
+                const quantidade = item.querySelector(".quantidade").value;
+                const preco = item.querySelector(".preco").value;
+
+                if (produtoId && quantidade && preco) {
+                    produtos.push({
+                        produto_id: produtoId,
+                        quantidade: quantidade,
+                        preco: preco
+                    });
+                }
+            });
+
+            if (produtos.length === 0) {
+                alert("Adicione pelo menos um produto válido.");
                 return;
             }
 
-            const button = document.querySelector("button");
+            const button = document.querySelector('button[onclick="registrarVenda()"]');
             button.disabled = true;
             button.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Registrando...';
 
             fetch("/registrar_venda", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    produto_id: produtoId,
-                    quantidade: quantidade,
-                    preco: preco
-                })
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ vendas: produtos })
             })
             .then(response => response.json())
             .then(data => {
                 const mensagem = document.getElementById("mensagem");
-
-                let quantidadeAtual = parseInt(option.getAttribute("data-quantidade"));
-                const quantidadeVendida = parseInt(quantidade);
-
                 if (data.status === "sucesso") {
-                    const novaQuantidade = quantidadeAtual - quantidadeVendida;
-                    option.setAttribute("data-quantidade", novaQuantidade);
-                    document.getElementById("quantidadeDisponivel").innerText = novaQuantidade;
-
                     mensagem.innerText = "Venda registrada com sucesso!";
                     mensagem.style.color = "green";
-
-                    if (novaQuantidade <= 0) {
-                        document.getElementById("detalhes").style.display = "none";
-                        select.value = "";
-                    } else {
-                        document.getElementById("quantidade").max = novaQuantidade;
-                        document.getElementById("quantidade").value = "";
-                    }
+                    location.reload();
                 } else {
                     mensagem.innerText = "Erro ao registrar venda: " + data.erro;
                     mensagem.style.color = "red";
                 }
             })
-            .catch(error => {
+            .catch(() => {
                 const mensagem = document.getElementById("mensagem");
                 mensagem.innerText = "Erro de conexão.";
                 mensagem.style.color = "red";

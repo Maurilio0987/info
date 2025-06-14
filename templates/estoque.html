@@ -351,20 +351,11 @@
                 preco_venda.textContent = 'R$ ' + parseFloat(produto[4]).toFixed(2);
                 
 
-                const acoes = document.createElement('td');
-                const botaoRemover = document.createElement('button');
-                botaoRemover.textContent = 'Remover';
-
-                botaoRemover.id = `remover-${produto[0]}`;
-                botaoRemover.onclick = () => removerProduto(produto[0]);
-                acoes.appendChild(botaoRemover);
-
                 linha.appendChild(id);
                 linha.appendChild(nome);
                 linha.appendChild(quantidade);
                 linha.appendChild(preco_compra);
                 linha.appendChild(preco_venda);
-                linha.appendChild(acoes);
 
                 tabela.appendChild(linha);
             });

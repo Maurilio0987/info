@@ -12,8 +12,8 @@ def sha256(texto):
 class DatabaseManager:
     def __init__(self, db_url):
         self.db_url = db_url
-    
-        self.executar("""SET TIME ZONE 'America/Sao_Paulo'""")
+
+
         self.executar("""
         CREATE TABLE IF NOT EXISTS usuarios (
             id SERIAL PRIMARY KEY,
@@ -55,8 +55,7 @@ class DatabaseManager:
             CONSTRAINT fk_usuario_id FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
         );
         """)
-        
-        
+
     def conectar_banco_de_dados(self):
         parsed_url = urlparse(self.db_url)
 
@@ -109,7 +108,7 @@ class DatabaseManager:
             return False
 
     def adicionar_usuario(self, usuario, senha):
-        query = "INSERT INTO usuarios (usuario, senha_hash) VALUES (%s, %s);"
+        query = "INSERT INTO usuarios (usuario, senha_hash, criado_em) VALUES (%s, %s, CURRENT_TIMESTAMP - INTERVAL '3 hours');"
         
         conexao = self.conectar_banco_de_dados()
         cursor = conexao.cursor()
@@ -142,7 +141,7 @@ class DatabaseManager:
         return linhas
 
     def registrar_historico(self, usuario_id, acao, descricao):
-        query = "INSERT INTO historico (usuario_id, acao, descricao) VALUES (%s, %s, %s);"
+        query = "INSERT INTO historico (usuario_id, acao, descricao, data) VALUES (%s, %s, %s, CURRENT_TIMESTAMP - INTERVAL '3 hours');"
 
         conexao = self.conectar_banco_de_dados()
         cursor = conexao.cursor()
@@ -186,7 +185,7 @@ class DatabaseManager:
     def registrar_venda(self, produto_id, quantidade, valor):
         query = """
             INSERT INTO vendas (produto_id, quantidade, valor, data)
-            VALUES (%s, %s, %s, CURRENT_TIMESTAMP);
+            VALUES (%s, %s, %s, CURRENT_TIMESTAMP - INTERVAL '3 hours');
         """
         query_atualizar_produto = """
                 UPDATE produtos
@@ -248,4 +247,8 @@ class DatabaseManager:
 if __name__ == "__main__":
     db_url = "postgresql://info_db_lsba_user:cdItHM06j2EdUB4UOiRRK56GdbiFTvUT@dpg-d0v2q3h5pdvs7382be30-a.oregon-postgres.render.com/info_db_lsba"
     db = DatabaseManager(db_url)
-    
+    #db.executar("""DROP TABLE IF EXISTS historico""")
+    #db.executar("""DROP TABLE IF EXISTS vendas""")
+
+    #db.executar("""DROP TABLE IF EXISTS usuarios""")
+    #db.executar("""DROP TABLE IF EXISTS produtos""")

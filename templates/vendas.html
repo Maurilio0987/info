@@ -142,7 +142,7 @@
 
                     <div class="form-group">
                         <label><i class="fas fa-hashtag"></i> Valor Total:</label>
-                        <input type="number" class="preco" required min="1">
+                        <input type="number" class="preco" required min="0.01" step="0.01">
                     </div>
 
                     <button type="button" class="remover-btn" onclick="removerProduto(this)"><i class="fas fa-trash"></i> Remover este produto</button>
@@ -175,8 +175,8 @@
 
             const quantidadeInput = container.querySelector(".quantidade");
             quantidadeInput.value = "";
-            quantidadeInput.max = quantidadeDisponivel;
             quantidadeInput.min = 1;
+            quantidadeInput.max = quantidadeDisponivel;
 
             container.querySelector(".detalhes").style.display = "block";
         }
@@ -222,21 +222,41 @@
 
         function registrarVenda() {
             const produtos = [];
+            let erroEncontrado = false;
+
             document.querySelectorAll(".produto-item").forEach(function(item) {
                 const select = item.querySelector("select");
                 const option = select.options[select.selectedIndex];
                 const produtoId = option.value;
-                const quantidade = item.querySelector(".quantidade").value;
-                const preco = item.querySelector(".preco").value;
+                const quantidadeInput = item.querySelector(".quantidade");
+                const precoInput = item.querySelector(".preco");
 
-                if (produtoId && quantidade && preco) {
-                    produtos.push({
-                        produto_id: produtoId,
-                        quantidade: quantidade,
-                        preco: preco
-                    });
+                const quantidade = parseFloat(quantidadeInput.value);
+                const preco = parseFloat(precoInput.value);
+                const quantidadeDisponivel = parseFloat(option.getAttribute("data-quantidade"));
+
+                if (!produtoId || isNaN(quantidade) || quantidade < 1 || quantidade > quantidadeDisponivel) {
+                    alert("Verifique a quantidade inserida para cada produto. Deve estar entre 1 e " + quantidadeDisponivel + ".");
+                    erroEncontrado = true;
+                    return;
                 }
+
+                if (isNaN(preco) || preco <= 0) {
+                    alert("O preço total deve ser um número válido e maior que zero.");
+                    erroEncontrado = true;
+                    return;
+                }
+
+                produtos.push({
+                    produto_id: produtoId,
+                    quantidade: quantidade,
+                    preco: preco
+                });
             });
+
+            if (erroEncontrado) {
+                return;
+            }
 
             if (produtos.length === 0) {
                 alert("Adicione pelo menos um produto válido.");
